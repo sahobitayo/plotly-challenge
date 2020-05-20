@@ -101,7 +101,7 @@ function metaData(sample) {
         // tags for each key-value in the metadata.
         Object.entries(result).forEach(([key, value]) => {
             var textToShow = (`${key}: ${value}`);
-            panel.append("h5").text(textToShow);
+            panel.append("h6").text(textToShow);
         })
     });
 };
@@ -119,50 +119,116 @@ function gaugeChart(sample) {
 
 
 
-        var data = [
-            {
-                // domain: { x: [0, 1], y: [0, 1] },
-                value: weeklyFrequency,
-                title: { text: "Belly Button Frequency <br> Scrubs per Week", font: { size: 24 } },
-                type: "indicator",
-                mode: "gauge+number",
-                delta: { reference: 380 },
-                gauge: {
-                    axis: { range: [null, 9] },
-                    bar: {color: "red"},
-                bgcolor: "white",
-                borderwidth: 2,
-                // bordercolor: "gray",
-                    steps: [
-                        { range: [0, 1], color: "hsl(125, 82%, 10%)" },
-                        { range: [1, 2], color: "hsl(125, 82%, 20%)" },
-                        { range: [2, 3], color: "hsl(125, 82%, 30%)" },
-                        { range: [3, 4], color: "hsl(125, 82%, 40%)7" },
-                        { range: [4, 5], color: "hsl(125, 82%, 50%)" },
-                        { range: [5, 6], color: "hsl(125, 82%, 60%)" },
-                        { range: [6, 7], color: "hsl(125, 82%, 70%)" },
-                        { range: [7, 8], color: "hsl(125, 82%, 80%)" },
-                        { range: [8, 9], color: "hsl(125, 82%, 90%)" }
-                    ],
-                    text: [
-                        "TOO FAST!",
-                        "Pretty Fast",
-                        "Fast",
-                        "Average",
-                        "Slow",
-                        "Super Slow",
-                        ""
-                      ],
-                    // threshold: {
-                    //     line: { color: "red", width: 4 },
-                    //     thickness: 0.75,
-                    //     value: 490
-                    // }
-                }
-            }
-        ];
+        // Enter a speed between 0 and 180
+        var level = weeklyFrequency;
 
-        var layout = { width: 600, height: 450, margin: { t: 0, b: 0 } };
+        // Trig to calc meter point
+        var degrees = 180 - (20*level),
+            radius = .6;
+        var radians = degrees * Math.PI / 180;
+        var x = radius * Math.cos(radians);
+        var y = radius * Math.sin(radians);
+        var path1 = (degrees < 45 || degrees > 135) ? 'M -0.0 -0.025 L 0.0 0.025 L ' : 'M -0.025 -0.0 L 0.025 0.0 L ';
+        // Path: may have to change to create a better triangle
+        var mainPath = path1,
+            pathX = String(x),
+            space = ' ',
+            pathY = String(y),
+            pathEnd = ' Z';
+        var path = mainPath.concat(pathX, space, pathY, pathEnd);
+
+
+
+        var data = [{
+            type: 'scatter',
+            x: [0], y: [0],
+            marker: { size: 10, color: '850000' },
+            showlegend: false,
+            name: 'wFreq',
+            text: level,
+            hoverinfo: 'text+name'
+        },
+        {
+            values: [45/8, 45/8, 45/8, 45/8, 45/8, 45/8, 45/8, 45/8, 45/8, 50],
+            rotation: 90,
+            text: ['8-9', '7-8', '6-7', '5-6', '4-6', '3-4', '2-3', '1-2', '0-1', ''],
+            textinfo: 'text',
+            textposition: 'inside',
+            marker: {
+                colors: ['hsl(125, 82%, 10%)', 'hsl(125, 82%, 20%)', 'hsl(125, 82%, 30%)',
+                    'hsl(125, 82%, 40%)', 'hsl(125, 82%, 50%)', 'hsl(125, 82%, 60%)',
+                    'hsl(125, 82%, 70%)', 'hsl(125, 82%, 80%)', 'hsl(125, 82%, 90%)', 'white']
+            },
+
+            labels: ['8-9','7-8','6-7','5-6', '4-5', '3-4', '2-3',
+            '1-2', '0-1', ''],
+            hoverinfo: 'label',
+            hole: .5,
+            type: 'pie',
+            showlegend: false
+        }];
+
+        var layout = {
+            shapes: [{
+                type: 'path',
+                path: path,
+                fillcolor: '850000',
+                line: {
+                    color: '850000'
+                }
+            }],
+            height: 700,
+            width: 700,
+            title: { text: "Belly Button Frequency <br> Scrubs per Week", font: { size: 24 } },
+            xaxis: {
+                zeroline: false, showticklabels: false,
+                showgrid: false, range: [-1, 1]
+            },
+            yaxis: {
+                zeroline: false, showticklabels: false,
+                showgrid: false, range: [-1, 1]
+            }
+        };
+
+
+
+// // Different type of Gauge chart but not as sophisticated
+        // var data = [
+        //     {
+        //         // domain: { x: [0, 1], y: [0, 1] },
+        //         value: weeklyFrequency,
+        //         title: { text: "Belly Button Frequency <br> Scrubs per Week", font: { size: 24 } },
+        //         type: "indicator",
+        //         mode: "gauge+number",
+        //         // delta: { reference: 380 },
+        //         gauge: {
+        //             axis: { range: [null, 9] },
+        //             bar: { color: "red" },
+        //             bgcolor: "white",
+        //             borderwidth: 2,
+        //             // bordercolor: "gray",
+        //             steps: [
+        //                 { range: [0, 1], color: "hsl(125, 82%, 10%)" },
+        //                 { range: [1, 2], color: "hsl(125, 82%, 20%)" },
+        //                 { range: [2, 3], color: "hsl(125, 82%, 30%)" },
+        //                 { range: [3, 4], color: "hsl(125, 82%, 40%)7" },
+        //                 { range: [4, 5], color: "hsl(125, 82%, 50%)" },
+        //                 { range: [5, 6], color: "hsl(125, 82%, 60%)" },
+        //                 { range: [6, 7], color: "hsl(125, 82%, 70%)" },
+        //                 { range: [7, 8], color: "hsl(125, 82%, 80%)" },
+        //                 { range: [8, 9], color: "hsl(125, 82%, 90%)" }
+        //             ],
+
+        //             // threshold: {
+        //             //     line: { color: "red", width: 4 },
+        //             //     thickness: 0.75,
+        //             //     value: 490
+        //             // }
+        //         }
+        //     }
+        // ];
+
+        // var layout = { width: 600, height: 450, margin: { t: 0, b: 0 } };
         Plotly.newPlot('gauge', data, layout);
     });
 }
